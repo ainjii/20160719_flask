@@ -11,6 +11,7 @@ AWESOMENESS = [
     'awesome', 'terrific', 'fantastic', 'neato', 'fantabulous', 'wowza', 'oh-so-not-meh',
     'brilliant', 'ducky', 'coolio', 'incredible', 'wonderful', 'smashing', 'lovely']
 
+RUDENESS = ['big fat stupid jerk', 'slob', 'snobby', 'lazy', 'cruel', 'rude', 'stinky']
 
 @app.route('/')
 def start_here():
@@ -22,13 +23,19 @@ def start_here():
            """
 
 
+def make_options(list_of_options):
+    option_parts = ['<option value="%s">%s</option>' % (choice, choice)
+                          for choice in list_of_options]
+    options = " ".join(option_parts)
+    return options
+
+
 @app.route('/hello')
 def say_hello():
     """Say hello and prompt for user's name."""
 
-    compliment_options = ['<option value="%s">%s</option>' % (compliment, compliment)
-                          for compliment in AWESOMENESS]
-    options = " ".join(compliment_options)
+    compliments = make_options(AWESOMENESS)
+    insults = make_options(RUDENESS)
 
     return """
     <!doctype html>
@@ -46,9 +53,36 @@ def say_hello():
           </select>
           <input type="submit">
         </form>
+        <form action="/diss">
+          <label>What's your name? <input type="text" name="person"></label>
+          <label for="field-insult">Choose an insult:</label>
+          <select name="insult" id="field-insult">
+            %s
+          </select>
+          <input type="submit">
+        </form>
       </body>
     </html>
-    """ % options
+    """ % (compliments, insults)
+
+@app.route('/diss')
+def diss_person():
+    """Get user name and diss them """
+
+    player = request.args.get("person")
+    insult = request.args.get("insult")
+
+    return """
+    <!doctype html>
+    <html>
+      <head>
+        <title>An Insult</title>
+      </head>
+      <body>
+        Hi %s I think you're %s!
+      </body>
+    </html>
+    """ % (player, insult)
 
 
 @app.route('/greet')
